@@ -37,7 +37,7 @@ You have been warned.
 #  dialog_confirm "$msg" "Warning"
 #  exit
 
-  echo "$msg" 
+  echo "$msg"
   read -r -s -p 'Continue anyway (AT YOUR OWN RISK!) [y/N]? ' \
        -n 1
   case $REPLY in
@@ -101,7 +101,7 @@ cmd_msg ()
   printf "%s" "$msg"
   local out=$($cmd 2>&1)
   local exit_status=$?
-  
+
   if [ $exit_status -eq 0 ]; then
     echo "$success"
   else
@@ -133,7 +133,7 @@ ChangeLog-$ketchup_latest" | vim -R -
       Update*)
         source_dir=$(echo "$sorted_dirs" | grep "linux-$list_minor" | head -n 1 |
                     sed 's/\/$//')
-        
+
         if [ -n "$source_dir" ]; then
 #update_symlink
           current_local=$(
@@ -141,7 +141,7 @@ ChangeLog-$ketchup_latest" | vim -R -
                   linux/.config \
             | awk -F - '{print $1}'
           )
-      
+
           [ "$ketchup_latest" != "$current_local" ] \
             && (
 # Allow to skip backup.  For example, in case we have downloaded
@@ -156,7 +156,7 @@ ChangeLog-$ketchup_latest" | vim -R -
                      ;;
                    *)
                      printf "Y\n\nBacking up existing kernel source tree ..."
-                     backup_dir="${source_dir}.bak" 
+                     backup_dir="${source_dir}.bak"
                      if [ -d "$backup_dir" ]; then
                        read -r -s -p "$(echo "Backup exists.  Replace [y/N]? " \
                          | fold -s)" \
@@ -248,7 +248,7 @@ Extract archive (existing code is preserved) [y/N]? " |
 
         cleaned=1
       fi
-        
+
       if [ $? -eq 0 ]; then
         printf 'Extracting archive ... '
         if [ -z "${sel##*gz*}" ]; then
@@ -273,10 +273,10 @@ reconfigure ()
     if [ ! -s .config ]; then
       boot_config=/boot/config-$(uname -r)
       if [ -s ../.config ]; then
-        printf 'Restoring .config from backup (../.config) ... ' 
+        printf 'Restoring .config from backup (../.config) ... '
         cp -Lp ../.config ./
       elif [ -s /proc/config.gz ]; then
-        printf 'Restoring .config from /proc/config.gz ... ' 
+        printf 'Restoring .config from /proc/config.gz ... '
         cp -Lp /proc/config.gz ./
       elif [ -s "$boot_config" ]; then
         printf 'Restoring .config from %s ...' "$boot_config"
@@ -304,7 +304,7 @@ reconfigure ()
   ) \
   && (
       echo
-      
+
       make xconfig || make menuconfig || make config
 
       if diff -q .config "../.config-${minor}-${revision}" 2>/dev/null; then
@@ -405,9 +405,9 @@ set +x
        fi
      ) \
   && (
-       kernel_version=$(awk '/^# Linux/ {print $3}' "$source_dir/.config")
+       kernel_version=$(awk '/^# Linux/ {print $3}' .config)
        read -r -s -p "$(echo "
-Install Linux $latest${append_to_version}${revision:+ rv:$revision} now
+Install Linux ${kernel_version}${append_to_version}${revision:+ rv:$revision} now
 (current is $current${current_revision:+ rv:$current_revision}) [Y/n]? " \
 | fold -s)" \
             -n 1
@@ -434,11 +434,11 @@ process_sub_selection ()
     '(Re)configure'*)
       reconfigure
       ;;
-    
+
     Prepare*)
       prepare_modules
       ;;
-    
+
     *)
       build_and_install
   esac
@@ -455,14 +455,14 @@ process_main_selection ()
       ## archive
       kernel_extract
       ;;
-    
+
     */)
       ## directory
       source_dir=${sel%/}
 #update_symlink
       latest=${source_dir##*-}
       ;;
-  
+
     *)
       ## kernel.org
       kernel_update
@@ -474,7 +474,7 @@ process_main_selection ()
         msg="Running Linux $current${current_revision:+ rv:$current_revision}"
         actions=$(printf "%s\n%s\n%s" "(Re)configure Linux $latest" \
           "Prepare modules" \
-          "Build Linux $latest${append_to_version}${revision:+ rv:$revision}") 
+          "Build Linux $latest${append_to_version}${revision:+ rv:$revision}")
 
         if [ $dialog ]; then
           while true
@@ -571,7 +571,7 @@ sorted_dirs=$(echo "$dirs" | sort -t . -k1,1nr -k2,2nr -k3,3nr -k4,4nr)
 ## linux-source-$minor* archives
 archives=$(ls -dF linux-source-$minor*.t*z* 2>/dev/null | grep -v /)
 
-[ ! $dialog ] && echo $dirs $archives | fold -s >&2 
+[ ! $dialog ] && echo $dirs $archives | fold -s >&2
 
 avail=$(echo "${ketchup_latest:+$ketchup_latest (from kernel.org)}
 $dirs
@@ -585,7 +585,7 @@ if [ $dialog ]; then
   while true
   do
     sel=$(dialog_menu "$msg_select" "" 0 $avail)
-    
+
     if [ -z "$sel" ]; then exit; fi
 
     process_main_selection
