@@ -410,18 +410,16 @@ set +x
 Install Linux ${kernel_version}${append_to_version}${revision:+ rv:$revision} now
 (current is $current${current_revision:+ rv:$current_revision}) [Y/n]? " \
 | fold -s)" \
-            -n 1
-       case $REPLY in
-         [Nn])
-           echo $REPLY;;
-         *)
-           printf "Y\n\n"
-## FIXME: Minor 4.9 specified, 4.9.x compiled, cannot install 4.9.x with this script
-           cd .. \
-             && sudo dpkg -i \
-"linux-image-${latest#source-}${append_to_version}_${revision}_i386.deb"
-       esac
-     )
+           -n 1
+      case $REPLY in
+        [Nn])
+          echo $REPLY;;
+        *)
+          printf "Y\n\n"
+          cd .. &&
+            sudo dpkg -i "linux-image-${kernel_version}${append_to_version}_${revision}_i386.deb"
+      esac
+    )
 }
 
 process_sub_selection ()
