@@ -502,8 +502,8 @@ process_main_selection ()
 
 dialog=$(which dialog)
 if [ $dialog ]; then
-  lines=${lines:-24}
-  columns=${columns:-80}
+  lines=${LINES:-24}
+  columns=${COLUMNS:-80}
   app_name='make-kernel'
   ver='0.5'
   copy='2012  Thomas Lahn'
