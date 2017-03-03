@@ -331,11 +331,10 @@ Use C-d or type \`exit' to continue.
 
 build_and_install ()
 {
-  export CONCURRENCY_LEVEL=4 \
-  && (
+  export CONCURRENCY_LEVEL=4 && (
       if [ $cleaned -eq 0 ]; then
         msg="Clean kernel and modules source tree before (say Yes only if you removed
-modules or build a new kernel)"
+   modules or build a new kernel)"
         if [ $dialog ]; then
           dialog_confirm "${msg}?"
           case $? in
@@ -344,7 +343,7 @@ modules or build a new kernel)"
           esac
         else
           read -r -s -p "$(echo "
-$msg [yes/No/cancel]? " | fold -s)" \
+      $msg [yes/No/cancel]? " | fold -s)" \
                 -n 1
         fi
 
@@ -364,9 +363,8 @@ $msg [yes/No/cancel]? " | fold -s)" \
             fi
         esac
       fi
-     ) \
-  && (
-       echo
+    ) && (
+      echo
 
 ## NOTE: $append_to_version in uname -r, $revision in dpkg -l
 ## (works around Eclipse version detection bug);
@@ -386,15 +384,28 @@ set -x
           kernel_image modules_image >/tmp/make-kernel.log 2>&1 &
 set +x
 
-## TODO: Display output in scrollable window
-       exit_status=$?
-       if [ $exit_status -ne 0 ]; then
-         echo >&2 'make-kernel: There were errors. Press RETURN to continue.'
-         read
-         exit $exit_status
-       fi
-     ) \
-  && (
+      ## PID of the 'nice make-kpkg' background process
+      bg_pid=$!
+      if [ $dialog ]; then
+        ## Display output in scrollable window
+        logfile=/tmp/make-kernel.log
+        dialog_tailbox "$logfile" '' --exit-label Close
+      fi
+
+      ## If there is no tailbox, or it is closed prematurely,
+      ## restore output and wait for background make-kpkg to exit
+      tail -f "$logfile" &
+
+      wait $bg_pid 2>/dev/null
+      exit_status=$?
+
+      if [ $exit_status -ne 0 ]; then
+        echo >&2 'make-kernel: There were errors. Press RETURN to continue.'
+        read -r -s
+      fi
+
+      [ ! $dialog ] && exit $exit_status
+    ) && (
        kernel_version=$(awk '/^# Linux/ {print $3}' .config)
        read -r -s -p "$(echo "
 Install Linux ${kernel_version}${append_to_version}${revision:+ rv:$revision} now
