@@ -373,27 +373,17 @@ $msg [yes/No/cancel]? " | fold -s)" \
 ## bash bug expands ${param:+foo bar} to quoted string -> unknown option
 ## worked around with $1 = '64'
 set -x
-       if [ "$arch" ]; then
-         DEB_HOST_ARCH=$arch nice -- \
-           make-kpkg \
-             --rootcmd $fakeroot \
-             --initrd \
-             --cross-compile - \
-             --arch "$arch" \
-             --revision ${revision} \
-             --append-to-version ${append_to_version} \
-             $options \
-             kernel_image modules_image
-       else
-         nice -- \
-           make-kpkg \
-             --rootcmd $fakeroot \
-             --initrd \
-             --revision ${revision} \
-             --append-to-version ${append_to_version} \
-             $options \
-             kernel_image modules_image
-       fi
+      [ "$arch" ] && export DEB_HOST_ARCH=$arch
+      nice -- \
+        make-kpkg \
+          --rootcmd "$fakeroot" \
+          --initrd \
+          ${arch:+--cross-compile} ${arch:+-} \
+          ${arch:+--arch} ${arch:+"${arch}"} \
+          --revision "${revision}" \
+          --append-to-version "${append_to_version}" \
+          $options \
+          kernel_image modules_image >/tmp/make-kernel.log 2>&1 &
 set +x
 
 ## TODO: Display output in scrollable window
