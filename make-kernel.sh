@@ -331,7 +331,8 @@ Use C-d or type \`exit' to continue.
 
 build_and_install ()
 {
-  export CONCURRENCY_LEVEL=4 && (
+  [ -z "$CONCURRENCY_LEVEL" ] && export CONCURRENCY_LEVEL=2
+  (
       if [ $cleaned -eq 0 ]; then
         msg="Clean kernel and modules source tree before (say Yes only if you removed
    modules or build a new kernel)"
